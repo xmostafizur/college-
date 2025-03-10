@@ -1,60 +1,63 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>বিকাশ পেমেন্ট ভেরিফিকেশন</title>
-  <style>
-    body { font-family: Arial; background: #f5f5f5; text-align: center; padding: 20px; }
-    .box { background: #fff; padding: 20px; margin: 20px auto; border-radius: 10px; max-width: 400px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    input, button { width: 90%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
-    button { background: #d60b52; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: #a5083c; }
-    .admin-link { margin-top: 20px; display: block; color: #333; text-decoration: underline; }
-  </style>
+  <title>Payment Submit</title>
 </head>
-<body>
-
-  <h2>বিকাশ পেমেন্ট</h2>
-  <div class="box">
-    <p>** Send Money করুন **</p>
-    <h3>01405985541</h3>
-    <p>তারপর আপনার তথ্য দিন</p>
-
-    <input type="text" id="senderNumber" placeholder="আপনার নাম্বার লিখুন" required>
-    <input type="text" id="trxId" placeholder="ট্রানজেকশন আইডি লিখুন" required>
+<body style="background:#f7f7f7; font-family:sans-serif;">
+  <h2>Payment Verification</h2>
+  <form id="paymentForm">
+    <label>Sender Number:</label><br>
+    <input type="text" id="senderNumber" required><br><br>
     
-    <button onclick="submitPayment()">Submit</button>
+    <label>Transaction ID:</label><br>
+    <input type="text" id="trxId" required><br><br>
     
-    <a href="admin.html" class="admin-link">Admin Panel</a>
-  </div>
+    <button type="submit">Submit Payment</button>
+  </form>
+
+  <!-- Firebase Script -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
   <script>
-    function submitPayment() {
-      const senderNumber = document.getElementById('senderNumber').value.trim();
-      const trxId = document.getElementById('trxId').value.trim();
+    const firebaseConfig = {
+      apiKey: "AIzaSyDCtqbWtWTqcyHi4aNG6rdYT1_pPvHG1ps",
+      authDomain: "bist-e2b75.firebaseapp.com",
+      databaseURL: "https://bist-e2b75-default-rtdb.firebaseio.com",
+      projectId: "bist-e2b75",
+      storageBucket: "bist-e2b75.appspot.com",
+      messagingSenderId: "992876255674",
+      appId: "1:992876255674:android:8bd9ef45babe485a002583"
+    };
 
-      if (!senderNumber || !trxId) {
-        alert("সব তথ্য পূরণ করুন!");
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const paymentForm = document.getElementById('paymentForm');
+
+    paymentForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const senderNumber = document.getElementById('senderNumber').value;
+      const trxId = document.getElementById('trxId').value;
+
+      if (senderNumber === "" || trxId === "") {
+        alert("Please fill all fields!");
         return;
       }
 
-      const payment = {
-        number: senderNumber,
+      const paymentData = {
+        senderNumber: senderNumber,
         trxId: trxId,
-        time: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString()
       };
 
-      let payments = JSON.parse(localStorage.getItem('payments')) || [];
-      payments.push(payment);
-      localStorage.setItem('payments', JSON.stringify(payments));
+      // Save to Firebase Database
+      const paymentRef = db.ref('payments');
+      paymentRef.push(paymentData);
 
-      document.getElementById('senderNumber').value = '';
-      document.getElementById('trxId').value = '';
-
-      alert("পেমেন্ট তথ্য সফলভাবে পাঠানো হয়েছে!");
-    }
+      alert("Payment submitted successfully!");
+      paymentForm.reset();
+    });
   </script>
-
 </body>
 </html>
