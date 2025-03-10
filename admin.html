@@ -1,81 +1,54 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin Panel</title>
-  <style>
-    body { font-family: Arial; background: #f0f0f0; padding: 20px; text-align: center; }
-    .login-box, .panel-box { background: #fff; padding: 20px; margin: 20px auto; border-radius: 10px; max-width: 400px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    input, button { width: 90%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
-    button { background: #333; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: #555; }
-    .payment-list { text-align: left; margin-top: 20px; }
-    .payment-item { background: #fafafa; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-  </style>
 </head>
-<body>
+<body style="background:#333; color:#fff; font-family:sans-serif;">
+  <h2>Admin Panel - Payment List</h2>
+  <div id="paymentList">Loading payments...</div>
 
-  <h2>Admin Login</h2>
-  <div class="login-box" id="loginBox">
-    <input type="text" id="adminUser" placeholder="Username">
-    <input type="password" id="adminPass" placeholder="Password">
-    <button onclick="adminLogin()">Login</button>
-  </div>
-
-  <div class="panel-box" id="adminPanel" style="display:none;">
-    <h3>পেমেন্ট তালিকা</h3>
-    <div class="payment-list" id="paymentList">
-      Loading payments...
-    </div>
-    <button onclick="logout()">Logout</button>
-  </div>
+  <!-- Firebase Script -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
   <script>
-    const adminUsername = "admin";
-    const adminPassword = "12345";
+    const firebaseConfig = {
+      apiKey: "AIzaSyDCtqbWtWTqcyHi4aNG6rdYT1_pPvHG1ps",
+      authDomain: "bist-e2b75.firebaseapp.com",
+      databaseURL: "https://bist-e2b75-default-rtdb.firebaseio.com",
+      projectId: "bist-e2b75",
+      storageBucket: "bist-e2b75.appspot.com",
+      messagingSenderId: "992876255674",
+      appId: "1:992876255674:android:8bd9ef45babe485a002583"
+    };
 
-    function adminLogin() {
-      const user = document.getElementById('adminUser').value.trim();
-      const pass = document.getElementById('adminPass').value.trim();
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-      if (user === adminUsername && pass === adminPassword) {
-        document.getElementById('loginBox').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
-        loadPayments();
-      } else {
-        alert("ভুল ইউজারনেম বা পাসওয়ার্ড!");
-      }
-    }
+    const paymentList = document.getElementById('paymentList');
 
-    function loadPayments() {
-      const payments = JSON.parse(localStorage.getItem('payments')) || [];
-      const listDiv = document.getElementById('paymentList');
-
-      if (payments.length === 0) {
-        listDiv.innerHTML = "<p>কোনো পেমেন্ট পাওয়া যায়নি!</p>";
+    // Fetch payments in real-time
+    const paymentRef = db.ref('payments');
+    paymentRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (!data) {
+        paymentList.innerHTML = "No payments found.";
         return;
       }
 
-      listDiv.innerHTML = '';
-      payments.forEach((payment, index) => {
-        listDiv.innerHTML += `
-          <div class="payment-item">
-            <strong>${index + 1}</strong><br>
-            নাম্বার: ${payment.number}<br>
-            ট্রানজেকশন আইডি: ${payment.trxId}<br>
-            সময়: ${payment.time}
-          </div>
-        `;
+      let listHtml = "<ul>";
+      Object.keys(data).forEach(key => {
+        const payment = data[key];
+        listHtml += `<li style="margin-bottom:10px;">
+          <strong>Sender:</strong> ${payment.senderNumber} <br>
+          <strong>TrxID:</strong> ${payment.trxId} <br>
+          <strong>Time:</strong> ${payment.timestamp}
+        </li>`;
       });
-    }
+      listHtml += "</ul>";
 
-    function logout() {
-      document.getElementById('adminPanel').style.display = 'none';
-      document.getElementById('loginBox').style.display = 'block';
-    }
+      paymentList.innerHTML = listHtml;
+    });
   </script>
-
 </body>
-  </html>
-  
+</html>
