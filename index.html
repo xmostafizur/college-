@@ -3,22 +3,16 @@
 <head>
   <title>Payment Submit</title>
 </head>
-<body style="background:#f7f7f7; font-family:sans-serif;">
+<body>
   <h2>Payment Verification</h2>
   <form id="paymentForm">
-    <label>Sender Number:</label><br>
-    <input type="text" id="senderNumber" required><br><br>
-    
-    <label>Transaction ID:</label><br>
-    <input type="text" id="trxId" required><br><br>
-    
-    <button type="submit">Submit Payment</button>
+    <input type="text" id="senderNumber" placeholder="Sender Number"><br><br>
+    <input type="text" id="trxId" placeholder="Transaction ID"><br><br>
+    <button type="submit">Submit</button>
   </form>
 
-  <!-- Firebase Script -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDCtqbWtWTqcyHi4aNG6rdYT1_pPvHG1ps",
@@ -33,30 +27,23 @@
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const paymentForm = document.getElementById('paymentForm');
-
-    paymentForm.addEventListener('submit', (e) => {
+    document.getElementById('paymentForm').addEventListener('submit', function(e){
       e.preventDefault();
       const senderNumber = document.getElementById('senderNumber').value;
       const trxId = document.getElementById('trxId').value;
 
-      if (senderNumber === "" || trxId === "") {
-        alert("Please fill all fields!");
-        return;
+      if(senderNumber && trxId){
+        const paymentData = {
+          senderNumber: senderNumber,
+          trxId: trxId,
+          time: new Date().toLocaleString()
+        };
+        db.ref('payments').push(paymentData);
+        alert('Payment Submitted!');
+        this.reset();
+      } else {
+        alert('Fill all fields!');
       }
-
-      const paymentData = {
-        senderNumber: senderNumber,
-        trxId: trxId,
-        timestamp: new Date().toLocaleString()
-      };
-
-      // Save to Firebase Database
-      const paymentRef = db.ref('payments');
-      paymentRef.push(paymentData);
-
-      alert("Payment submitted successfully!");
-      paymentForm.reset();
     });
   </script>
 </body>
