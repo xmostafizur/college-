@@ -3,14 +3,12 @@
 <head>
   <title>Admin Panel</title>
 </head>
-<body style="background:#333; color:#fff; font-family:sans-serif;">
-  <h2>Admin Panel - Payment List</h2>
-  <div id="paymentList">Loading payments...</div>
+<body>
+  <h2>Admin Panel - Payment Records</h2>
+  <div id="paymentList">Loading...</div>
 
-  <!-- Firebase Script -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDCtqbWtWTqcyHi4aNG6rdYT1_pPvHG1ps",
@@ -27,27 +25,20 @@
 
     const paymentList = document.getElementById('paymentList');
 
-    // Fetch payments in real-time
-    const paymentRef = db.ref('payments');
-    paymentRef.on('value', (snapshot) => {
+    db.ref('payments').on('value', (snapshot) => {
       const data = snapshot.val();
       if (!data) {
         paymentList.innerHTML = "No payments found.";
         return;
       }
 
-      let listHtml = "<ul>";
-      Object.keys(data).forEach(key => {
-        const payment = data[key];
-        listHtml += `<li style="margin-bottom:10px;">
-          <strong>Sender:</strong> ${payment.senderNumber} <br>
-          <strong>TrxID:</strong> ${payment.trxId} <br>
-          <strong>Time:</strong> ${payment.timestamp}
-        </li>`;
+      let list = "<ul>";
+      Object.keys(data).forEach(id => {
+        const p = data[id];
+        list += `<li>${p.senderNumber} | ${p.trxId} | ${p.time}</li>`;
       });
-      listHtml += "</ul>";
-
-      paymentList.innerHTML = listHtml;
+      list += "</ul>";
+      paymentList.innerHTML = list;
     });
   </script>
 </body>
